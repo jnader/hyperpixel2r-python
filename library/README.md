@@ -23,6 +23,14 @@ Latest/development library from GitHub:
 * `cd hyperpixel2r-python`
 * `sudo ./install.sh`
 
+# For RPi5 (Test version)
+
+Install gpiod:
+
+```
+pip3 install gpiod
+```
+
 # Usage
 
 Set up touch driver instance:

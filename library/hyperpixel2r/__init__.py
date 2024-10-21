@@ -1,27 +1,34 @@
+import gpiod
 import smbus2
 import struct
-import RPi.GPIO as GPIO
-
 
 __version__ = '0.0.1'
 
 
 class Touch:
-    def __init__(self, bus=11, i2c_addr=0x15, interrupt_pin=27):
+    def __init__(self, bus=11, i2c_addr=0x15, chip_name="/dev/gpiochip4", line_offset=27):
         self._i2c_addr = i2c_addr
-        self._interrupt_pin = interrupt_pin
         self._bus = smbus2.SMBus(bus)
         self._callback_handler = None
         self._touches = {}
 
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self._interrupt_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self._interrupt_pin, edge=GPIO.FALLING, callback=self._handle_interrupt, bouncetime=1)
+        self._chip = gpiod.Chip(chip_name)
+        self._line = self._chip.get_line(line_offset)
+
+        self._line.request(consumer="Touch", type=gpiod.LINE_REQ_EV_BOTH_EDGES)
 
     def on_touch(self, handler):
         self._callback_handler = handler
 
-    def _handle_interrupt(self, pin):
+    def _handle_interrupt(self):
+        while True:
+            event = self._line.event_wait(sec=1)
+            if event:
+                event_type = self._line.event_read().type
+                if event_type == gpiod.LineEvent.FALLING_EDGE:
+                    self._process_touch()
+
+    def _process_touch(self):
         count = self._bus.read_byte_data(self._i2c_addr, 0x02)
         # We don't get release events unless we always read both touches
         count = 2
