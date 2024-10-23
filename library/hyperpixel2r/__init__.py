@@ -10,12 +10,12 @@ class Touch:
     def __init__(self, bus=11, i2c_addr=0x15, chip_name="/dev/gpiochip4", line_offset=27):
         self._i2c_addr = i2c_addr
         self._bus = smbus2.SMBus(bus)
-
+        time.sleep(1)
         self._callback_handler = None
         self._touches = {}
 
         self._chip = gpiod.Chip(chip_name)
-        self._line = self._chip.get_line(line_offset)
+        self._line = self._chip.get_line_info(line_offset)
 
         self._line.request(consumer="Touch", type=gpiod.LINE_REQ_EV_BOTH_EDGES)
 
