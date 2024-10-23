@@ -1,6 +1,7 @@
 import gpiod
 import smbus2
 import struct
+import time
 
 __version__ = '0.0.1'
 
@@ -9,6 +10,7 @@ class Touch:
     def __init__(self, bus=11, i2c_addr=0x15, chip_name="/dev/gpiochip4", line_offset=27):
         self._i2c_addr = i2c_addr
         self._bus = smbus2.SMBus(bus)
+
         self._callback_handler = None
         self._touches = {}
 
