@@ -33,7 +33,11 @@ class Touch:
         # We don't get release events unless we always read both touches
         count = 2
         if count > 0:
-            data = self._bus.read_i2c_block_data(self._i2c_addr, 0x03, count * 6)
+            try:
+                data = self._bus.read_i2c_block_data(self._i2c_addr, 0x03, count * 6)
+            except IOError as e:
+                print(f"IO Error : {e}")
+                return
             for i in range(count):
                 offset = i * 6
                 touch_status = False
